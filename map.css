@@ -48,10 +48,52 @@ header {
   pointer-events: none; /* let panning/zooming pass through to the map */
 
   circle {
-    fill: steelblue;
+    fill: var(--color);
     fill-opacity: 60%;
     stroke: white;
     stroke-width: 1;
     pointer-events: auto; /* re-enable hover so tooltips show */
+  }
+}
+
+/* Flow colors shared by the map circles and the legend swatches */
+#map circle,
+.legend > div {
+  --color-departures: steelblue;
+  --color-arrivals: darkorange;
+  --color: color-mix(
+    in oklch,
+    var(--color-departures) calc(100% * var(--departure-ratio)),
+    var(--color-arrivals)
+  );
+}
+
+/* Legend: separate swatches & labels */
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 1.5em; /* wide gap between items... */
+  margin-block: 1em;
+  align-self: stretch;
+
+  .legend-title {
+    color: #888;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    letter-spacing: 0.05em;
+  }
+
+  > div {
+    display: flex;
+    align-items: center;
+    gap: 0.4em; /* ...narrow gap between swatch and its label */
+
+    &::before {
+      content: '';
+      width: 1em;
+      height: 1em;
+      border-radius: 50%;
+      background: var(--color);
+    }
   }
 }

@@ -60,6 +60,15 @@ function computeStationTraffic(stations, trips) {
   });
 }
 
+// Bucket the departure share into 3 colors: 0 (arrivals), 0.5 (balanced), 1 (departures)
+let stationFlow = d3.scaleQuantize().domain([0, 1]).range([0, 0.5, 1]);
+
+// Departures / total, bucketed. Stations with no trips count as balanced
+// (otherwise 0/0 = NaN gives no color at all).
+function departureRatio(d) {
+  return d.totalTraffic ? stationFlow(d.departures / d.totalTraffic) : 0.5;
+}
+
 // Minutes since midnight for a Date (0–1439)
 function minutesSinceMidnight(date) {
   return date.getHours() * 60 + date.getMinutes();
@@ -160,6 +169,7 @@ map.on('load', async () => {
     .enter()
     .append('circle')
     .attr('r', (d) => radiusScale(d.totalTraffic)) // Radius sized by traffic
+    .style('--departure-ratio', departureRatio) // Color by traffic flow
     .each(function (d) {
       // Add <title> for browser tooltips
       d3.select(this)
@@ -222,6 +232,7 @@ map.on('load', async () => {
       .data(filteredStations, (d) => d.short_name) // Ensure D3 tracks elements correctly
       .join('circle') // Ensure the data is bound correctly
       .attr('r', (d) => radiusScale(d.totalTraffic)) // Update circle sizes
+      .style('--departure-ratio', departureRatio) // Update flow colors
       .select('title') // Keep tooltips in sync with the filtered counts
       .text(
         (d) =>
